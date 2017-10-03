@@ -1,2 +1,2 @@
-# CSAPP-3rd-Lab
+# CSAPP-3rd-Labs
 My solutions for CSAPP-3rd-Labs.
