@@ -22,6 +22,65 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
+    int a0,a1,a2,a3,a4,a5,a6,a7;
+    int i,j,k,h;
+
+    if(N==32){
+        // ./test-trans -M 32 -N 32
+        for(i=0;i<4;i++){
+            for(j=0;j<4;j++){
+                for(k=8*i;k<8*(i+1);k++){
+                    h=8*j;
+                    a0=A[k][h];a1=A[k][h+1];a2=A[k][h+2];a3=A[k][h+3];
+                    a4=A[k][h+4];a5=A[k][h+5];a6=A[k][h+6];a7=A[k][h+7];
+                    B[h][k]=a0;B[h+1][k]=a1;B[h+2][k]=a2;B[h+3][k]=a3;
+                    B[h+4][k]=a4;B[h+5][k]=a5;B[h+6][k]=a6;B[h+7][k]=a7;
+                }
+            }
+        }
+    }
+
+    else if(N==64){
+        // ./test-trans -M 64 -N 64
+        for(i=0;i<64;i+=8){
+            for(j=0;j<64;j+=8){
+                for(k=j;k<j+4;k++){
+                    a0=A[k][i];a1=A[k][i+1];a2=A[k][i+2];a3=A[k][i+3];
+                    a4=A[k][i+4];a5=A[k][i+5];a6=A[k][i+6];a7=A[k][i+7];
+
+                    B[i][k]=a0;B[i][k+4]=a4;B[i+1][k]=a1;B[i+1][k+4]=a5;
+                    B[i+2][k]=a2;B[i+2][k+4]=a6;B[i+3][k]=a3;B[i+3][k+4]=a7;                                               }
+
+                for(k=i;k<i+4;k++){
+                    a0=B[k][j+4];a1=B[k][j+5];a2=B[k][j+6];a3=B[k][j+7];
+                    a4=A[j+4][k];a5=A[j+5][k];a6=A[j+6][k];a7=A[j+7][k];
+
+                    B[k][j+4]=a4;B[k][j+5]=a5;B[k][j+6]=a6;B[k][j+7]=a7;
+                    B[k+4][j]=a0;B[k+4][j+1]=a1;B[k+4][j+2]=a2;B[k+4][j+3]=a3;
+                    
+                }
+
+                for(k=i+4;k<i+8;k++){
+                    a0=A[j+4][k];a1=A[j+5][k];a2=A[j+6][k];a3=A[j+7][k];
+
+                    B[k][j+4]=a0;B[k][j+5]=a1;B[k][j+6]=a2;B[k][j+7]=a3;
+                }
+            }
+        }
+    }
+    
+    else{
+        // ./test-trans -M 61 -N 67
+        for(i=0;i<N;i+=16){
+            for(j=0;j<M;j+=16){
+                for(k=i;k<i+16&&k<N;k++){
+                    for(h=j;h<j+16&&h<M;h++){
+                        B[h][k]=A[k][h];
+                    }
+                }
+            }
+        }
+    }
 }
 
 /* 
